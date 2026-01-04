@@ -1,5 +1,7 @@
 from ast import literal_eval
 import numpy as np
+from numpy.lib.stride_tricks import sliding_window_view
+import time
 
 def get_input_data():
     with open('data/Number_Sequences.txt') as f:
@@ -33,19 +35,49 @@ def get_signal2(s_arr):
     max_seg = max(find_segments_with_conditions(s_diff), key=lambda x: len(x[2]))
     return max_seg
 
+# def find_segments_with_conditions(arr):
+#     segments = []
+#     n = len(arr)
+#     for i in range(n):
+#         for j in range(i, n):
+#             segment = arr[i : j + 1]
+#             count_zero = np.count_nonzero(segment == 0)
+#             count_one = np.count_nonzero(segment == 1)
+#             count_two = np.count_nonzero(segment == 2)
+#             count_not = np.count_nonzero((segment < 0) | (segment > 2))
+#             if count_zero == 1 and count_two == 1 and count_one >= 1 and count_not == 0:
+#                 segments.append([i, j+1, segment, (segment == 0).argmax()])
+#     return segments
+
+
 def find_segments_with_conditions(arr):
     segments = []
     n = len(arr)
-    for i in range(n):
-        for j in range(i, n):
-            segment = arr[i : j + 1]
-            count_zero = np.count_nonzero(segment == 0)
-            count_one = np.count_nonzero(segment == 1)
-            count_two = np.count_nonzero(segment == 2)
-            count_not = np.count_nonzero((segment < 0) | (segment > 2))
-            if count_zero == 1 and count_two == 1 and count_one >= 1 and count_not == 0:
-                segments.append([i, j+1, segment, (segment == 0).argmax()])
+    arr = np.asarray(arr)
+    for length in range(1, n + 1):
+        windows = sliding_window_view(arr, window_shape=length)
+
+        count_zero = (windows == 0).sum(axis=1)
+        count_one = (windows == 1).sum(axis=1)
+        count_two = (windows == 2).sum(axis=1)
+        count_not = ((windows < 0) | (windows > 2)).sum(axis=1)
+
+        mask = (count_zero == 1) & (count_two == 1) & (count_one >= 1) & (count_not == 0)
+        valid_indices = np.where(mask)[0]
+
+        for idx in valid_indices:
+            i = idx
+            j = idx + length
+            segment = windows[idx]
+            zero_pos = np.argmax(segment == 0)
+            segments.append([i, j, segment.copy(), zero_pos])
+
     return segments
 
+
 if __name__ == '__main__':
+    start_time = time.perf_counter()
     print(get_answer())
+    end_time = time.perf_counter()
+    elapsed_time = end_time - start_time
+    print(f"Time taken: {elapsed_time:.6f} seconds")
