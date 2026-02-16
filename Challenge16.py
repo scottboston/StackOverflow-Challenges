@@ -14,18 +14,12 @@ def calculate_min_coins(coin_data: list):
     target = coin_data[2]
 
     c = np.ones(len(coins)).tolist()
-    a_matrix = coins
-    b_l = np.array([target])
-    b_u = np.array([target])
-
-    constraints = [LinearConstraint(a_matrix, b_l, b_u)]
-    integrality = np.ones(len(coins)).tolist()
-
+    integrality = 1
+    constraints = [LinearConstraint(coins, target, target)]
     bounds = Bounds(0, coin_counts)
+
     res = milp(c, integrality=integrality, bounds=bounds, constraints=constraints)
-    if not res.success:
-        return -1
-    return sum(res.x)
+    return -1 if not res.success else int(sum(res.x))
 
 
 def test_solution():
