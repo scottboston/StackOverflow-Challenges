@@ -3,5 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="uv (StackOverflowChallenges)" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="uv (StackOverflowChallenges)" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="uv (StackOverflow-Challenges)" project-jdk-type="Python SDK" />
 </project>
